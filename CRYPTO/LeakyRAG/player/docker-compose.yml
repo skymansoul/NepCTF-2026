@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  leakyrag:
+    build: .
+    ports:
+      - "9084:8080"
+    environment:
+      - FLAG=flag{l34ky_v3ct0r_s34rch_1s_n0t_3ncrypt10n}
+    restart: unless-stopped

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文档列表 — SecureRAG</title>
+<style>
+  :root {
+    --bg-primary: #0a0e14; --bg-secondary: #11161e;
+    --bg-card: rgba(255,255,255,.025); --border: rgba(255,255,255,.06);
+    --border-focus: rgba(70,140,255,.3); --text-primary: #c8d6e5;
+    --text-secondary: #6b7280; --text-heading: #e8edf4;
+    --accent: #468cff; --green: #4ade80;
+    --radius: 10px; --radius-sm: 6px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter','Segoe UI','PingFang SC',system-ui,-apple-system,sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh;line-height:1.6}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:56px;border-bottom:1px solid var(--border);background:var(--bg-secondary);position:sticky;top:0;z-index:10}
+  .nav-brand{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:1.05rem;color:var(--text-heading);text-decoration:none}
+  .nav-brand .icon{font-size:1.3rem}
+  .nav-links{display:flex;gap:1.5rem;align-items:center}
+  .nav-links a{color:var(--text-secondary);text-decoration:none;font-size:.82rem;transition:color .15s}
+  .nav-links a:hover,.nav-links a.active{color:var(--text-heading)}
+  .nav-links a.active{font-weight:600}
+  .nav-status{display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--green)}
+  .nav-status .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+  .container{max-width:900px;margin:0 auto;padding:2rem 1.5rem 4rem}
+  .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem}
+  .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+  .card-title{font-weight:700;font-size:.9rem;color:var(--text-heading)}
+  .doc-item{display:flex;align-items:center;gap:1rem;padding:.7rem .8rem;border-radius:var(--radius-sm);transition:background .1s}
+  .doc-item:hover{background:rgba(255,255,255,.02)}
+  .doc-item+.doc-item{border-top:1px solid var(--border)}
+  .doc-id{font-family:'JetBrains Mono','Fira Code',monospace;font-size:.78rem;color:var(--accent);font-weight:600;width:6rem;flex-shrink:0}
+  .doc-text{font-size:.78rem;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .empty-state{text-align:center;padding:2rem;color:var(--text-secondary);font-size:.82rem}
+  footer{text-align:center;padding:2rem;color:var(--text-secondary);font-size:.72rem;border-top:1px solid var(--border);margin-top:2rem}
+  @media(max-width:640px){nav{padding:0 1rem}.nav-links{display:none}.container{padding:1.5rem 1rem 3rem}.doc-id{width:5rem}}
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-brand" href="/"><span class="icon">🔐</span> SecureRAG</a>
+  <div class="nav-links">
+    <a href="/">首页</a>
+    <a href="/search.html">搜索</a>
+    <a href="/upload.html">上传</a>
+    <a href="/docs.html" class="active">文档</a>
+    <div class="nav-status"><span class="dot"></span> 运行中</div>
+  </div>
+</nav>
+<div class="container">
+  <section class="card">
+    <div class="card-header"><span class="card-title">📋 文档列表</span></div>
+    <div class="stats-row" style="display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;margin-bottom:1rem">
+      <div class="stat-card" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;text-align:center"><div class="stat-value" id="stat-docs" style="font-size:1.4rem;font-weight:700;color:var(--text-heading)">—</div><div style="font-size:.72rem;color:var(--text-secondary);margin-top:.2rem">文档总数</div></div>
+      <div class="stat-card" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;text-align:center"><div class="stat-value" id="stat-dim" style="font-size:1.4rem;font-weight:700;color:var(--text-heading)">64</div><div style="font-size:.72rem;color:var(--text-secondary);margin-top:.2rem">向量维度</div></div>
+    </div>
+    <div id="doc-list" style="font-size:.78rem"><div class="empty-state">加载文档列表中…</div></div>
+  </section>
+</div>
+<footer>SecureRAG v1.0 &copy; 2025 SecureAI Labs.</footer>
+<script>
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+async function loadStats(){try{const r=await fetch('/api/stats'),d=await r.json();document.getElementById('stat-docs').textContent=d.total_docs;document.getElementById('stat-dim').textContent=d.dim}catch(e){}}
+async function loadDocs(){const c=document.getElementById('doc-list'),ids=['doc_000','doc_001','doc_002','doc_003','doc_004'];const rs=[];for(const id of ids){try{const r=await fetch('/api/doc/'+id),d=await r.json();if(!d.error)rs.push(d)}catch(e){}}if(rs.length===0){c.innerHTML='<div class="empty-state">暂无文档。</div>';return}c.innerHTML=rs.map(d=>'<div class="doc-item"><span class="doc-id">'+esc(d.doc_id)+'</span><span class="doc-text">'+esc(d.text)+'</span></div>').join('')}
+loadStats();loadDocs();
+</script>
+</body>
+</html>

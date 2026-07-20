@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>上传文档 — SecureRAG</title>
+<style>
+  :root {
+    --bg-primary: #0a0e14; --bg-secondary: #11161e;
+    --bg-card: rgba(255,255,255,.025); --border: rgba(255,255,255,.06);
+    --border-focus: rgba(70,140,255,.3); --text-primary: #c8d6e5;
+    --text-secondary: #6b7280; --text-heading: #e8edf4;
+    --accent: #468cff; --green: #4ade80; --green-dim: rgba(74,222,128,.12); --red: #f87171;
+    --radius: 10px; --radius-sm: 6px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter','Segoe UI','PingFang SC',system-ui,-apple-system,sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh;line-height:1.6}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:56px;border-bottom:1px solid var(--border);background:var(--bg-secondary);position:sticky;top:0;z-index:10}
+  .nav-brand{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:1.05rem;color:var(--text-heading);text-decoration:none}
+  .nav-brand .icon{font-size:1.3rem}
+  .nav-links{display:flex;gap:1.5rem;align-items:center}
+  .nav-links a{color:var(--text-secondary);text-decoration:none;font-size:.82rem;transition:color .15s}
+  .nav-links a:hover,.nav-links a.active{color:var(--text-heading)}
+  .nav-links a.active{font-weight:600}
+  .nav-status{display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--green)}
+  .nav-status .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+  .container{max-width:700px;margin:0 auto;padding:2rem 1.5rem 4rem}
+  .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem}
+  .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+  .card-title{font-weight:700;font-size:.9rem;color:var(--text-heading)}
+  textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.65rem .85rem;color:var(--text-primary);font-size:.85rem;font-family:inherit;resize:vertical;min-height:120px;margin-bottom:.6rem;transition:border-color .15s}
+  textarea:focus{outline:none;border-color:var(--border-focus)}
+  textarea::placeholder{color:var(--text-secondary)}
+  .btn{padding:.55rem 1.2rem;border-radius:var(--radius-sm);border:none;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:#3b7de6}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed}
+  .btn-row{display:flex;justify-content:flex-end;gap:.5rem}
+  .toast{position:fixed;bottom:2rem;right:2rem;padding:.7rem 1.2rem;border-radius:var(--radius-sm);font-size:.82rem;font-weight:600;z-index:100;animation:slideUp .25s ease-out;pointer-events:none}
+  .toast-success{background:var(--green-dim);color:var(--green);border:1px solid rgba(74,222,128,.2)}
+  .toast-error{background:rgba(248,113,113,.12);color:var(--red);border:1px solid rgba(248,113,113,.2)}
+  @keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  footer{text-align:center;padding:2rem;color:var(--text-secondary);font-size:.72rem;border-top:1px solid var(--border);margin-top:2rem}
+  @media(max-width:640px){nav{padding:0 1rem}.nav-links{display:none}.container{padding:1.5rem 1rem 3rem}}
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-brand" href="/"><span class="icon">🔐</span> SecureRAG</a>
+  <div class="nav-links">
+    <a href="/">首页</a>
+    <a href="/search.html">搜索</a>
+    <a href="/upload.html" class="active">上传</a>
+    <a href="/docs.html">文档</a>
+    <div class="nav-status"><span class="dot"></span> 运行中</div>
+  </div>
+</nav>
+<div class="container">
+  <section class="card">
+    <div class="card-header"><span class="card-title">📄 上传文档</span></div>
+    <textarea id="upload-text" placeholder="粘贴或输入文档内容，系统将加密并建立索引…"></textarea>
+    <div class="btn-row"><button class="btn btn-primary" id="upload-btn" onclick="doUpload()">上传并加密</button></div>
+    <div id="upload-result" style="margin-top:.5rem;font-size:.78rem"></div>
+  </section>
+</div>
+<footer>SecureRAG v1.0 &copy; 2025 SecureAI Labs.</footer>
+<div id="toast-container"></div>
+<script>
+function toast(m,t){const e=document.createElement('div');e.className='toast toast-'+t;e.textContent=m;document.getElementById('toast-container').appendChild(e);setTimeout(()=>e.remove(),3000)}
+async function doUpload(){const ta=document.getElementById('upload-text'),b=document.getElementById('upload-btn'),t=ta.value.trim();if(!t){toast('请输入要上传的文档内容','error');return}if(t.length>10000){toast('文本过长（最多 10,000 字符）','error');return}b.disabled=true;b.textContent='加密中…';try{const r=await fetch('/api/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t})}),d=await r.json();if(d.error)toast(d.error,'error');else{toast('✓ 上传成功，文档ID: '+d.doc_id,'success');ta.value=''}}catch(e){toast('网络错误，上传失败','error')}finally{b.disabled=false;b.textContent='上传并加密'}}
+</script>
+</body>
+</html>

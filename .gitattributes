@@ -1,0 +1,7 @@
+*.zip filter=lfs diff=lfs merge=lfs -text
+*.GHO filter=lfs diff=lfs merge=lfs -text
+d8 filter=lfs diff=lfs merge=lfs -text
+*.ghs filter=lfs diff=lfs merge=lfs -text
+*.jar filter=lfs diff=lfs merge=lfs -text
+*.bin filter=lfs diff=lfs merge=lfs -text
+qemu-hexagon filter=lfs diff=lfs merge=lfs -text

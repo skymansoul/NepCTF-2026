@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>向量搜索 — SecureRAG</title>
+<style>
+  :root {
+    --bg-primary: #0a0e14; --bg-secondary: #11161e;
+    --bg-card: rgba(255,255,255,.025); --border: rgba(255,255,255,.06);
+    --border-focus: rgba(70,140,255,.3); --text-primary: #c8d6e5;
+    --text-secondary: #6b7280; --text-heading: #e8edf4;
+    --accent: #468cff; --green: #4ade80; --red: #f87171;
+    --radius: 10px; --radius-sm: 6px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter','Segoe UI','PingFang SC',system-ui,-apple-system,sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh;line-height:1.6}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:56px;border-bottom:1px solid var(--border);background:var(--bg-secondary);position:sticky;top:0;z-index:10}
+  .nav-brand{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:1.05rem;color:var(--text-heading);text-decoration:none}
+  .nav-brand .icon{font-size:1.3rem}
+  .nav-links{display:flex;gap:1.5rem;align-items:center}
+  .nav-links a{color:var(--text-secondary);text-decoration:none;font-size:.82rem;transition:color .15s}
+  .nav-links a:hover,.nav-links a.active{color:var(--text-heading)}
+  .nav-links a.active{font-weight:600}
+  .nav-status{display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--green)}
+  .nav-status .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+  .container{max-width:900px;margin:0 auto;padding:2rem 1.5rem 4rem}
+  .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem}
+  .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+  .card-title{font-weight:700;font-size:.9rem;color:var(--text-heading)}
+  .search-box{display:flex;gap:.5rem}
+  .search-input{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.65rem .85rem;color:var(--text-primary);font-size:.85rem;font-family:inherit;transition:border-color .15s}
+  .search-input:focus{outline:none;border-color:var(--border-focus)}
+  .search-input::placeholder{color:var(--text-secondary)}
+  .btn{padding:.55rem 1.2rem;border-radius:var(--radius-sm);border:none;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:#3b7de6}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed}
+  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-secondary)}
+  .btn-ghost:hover{border-color:rgba(255,255,255,.15);color:var(--text-primary)}
+  .result-item{display:flex;align-items:center;gap:1rem;padding:.7rem .8rem;border-radius:var(--radius-sm);transition:background .1s}
+  .result-item:hover{background:rgba(255,255,255,.02)}
+  .result-item+.result-item{border-top:1px solid var(--border)}
+  .result-rank{font-size:.7rem;color:var(--text-secondary);width:1.2rem;text-align:center;font-weight:600}
+  .result-info{flex:1;min-width:0}
+  .result-id{font-family:'JetBrains Mono','Fira Code',monospace;font-size:.78rem;color:var(--accent);font-weight:600}
+  .result-snippet{font-size:.75rem;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.1rem}
+  .result-score{font-size:.78rem;font-weight:700;color:var(--text-heading);font-family:'JetBrains Mono','Fira Code',monospace;white-space:nowrap}
+  .result-protected{color:var(--red);font-size:.72rem;font-weight:600}
+  .empty-state{text-align:center;padding:2rem;color:var(--text-secondary);font-size:.82rem}
+  footer{text-align:center;padding:2rem;color:var(--text-secondary);font-size:.72rem;border-top:1px solid var(--border);margin-top:2rem}
+  @media(max-width:640px){nav{padding:0 1rem}.nav-links{display:none}.container{padding:1.5rem 1rem 3rem}.search-box{flex-direction:column}.result-score{display:none}}
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-brand" href="/"><span class="icon">🔐</span> SecureRAG</a>
+  <div class="nav-links">
+    <a href="/">首页</a>
+    <a href="/search.html" class="active">搜索</a>
+    <a href="/upload.html">上传</a>
+    <a href="/docs.html">文档</a>
+    <div class="nav-status"><span class="dot"></span> 运行中</div>
+  </div>
+</nav>
+<div class="container">
+  <section class="card">
+    <div class="card-header"><span class="card-title">🔍 向量搜索</span></div>
+    <div class="search-box">
+      <input class="search-input" id="search-input" type="text" placeholder="输入查询内容，系统加密后搜索并解密结果…" onkeydown="if(event.key==='Enter')doSearch()">
+      <select id="top-k" style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.55rem .65rem;color:var(--text-primary);font-size:.82rem;font-family:inherit">
+        <option value="5">前 5 条</option>
+        <option value="10">前 10 条</option>
+        <option value="20">前 20 条</option>
+      </select>
+      <button class="btn btn-primary" id="search-btn" onclick="doSearch()">搜索</button>
+    </div>
+    <div class="result-list" id="results" style="margin-top:1rem">
+      <div class="empty-state">在上方输入查询内容，搜索加密索引。</div>
+    </div>
+  </section>
+</div>
+<footer>SecureRAG v1.0 &copy; 2025 SecureAI Labs.</footer>
+<script>
+const DIM=64;
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function embed(t){const d=new TextEncoder().encode(t),v=new Float64Array(DIM).fill(1);const n=Math.min(d.length,DIM-1);for(let i=0;i<n;i++)v[i]=Math.exp((d[i]-128)/64);const m=Math.sqrt(v.reduce((s,x)=>s+x*x,0));for(let i=0;i<DIM;i++)v[i]/=m;return Array.from(v)}
+async function doSearch(){const i=document.getElementById('search-input'),b=document.getElementById('search-btn'),t=i.value.trim();if(!t)return;b.disabled=true;b.textContent='搜索中…';try{const v=embed(t),k=parseInt(document.getElementById('top-k').value),r=await fetch('/api/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({vector:v,top_k:k})}),d=await r.json();if(d.error)renderError(d.error);else renderResults(d.results)}catch(e){renderError('网络错误，请检查服务是否运行')}finally{b.disabled=false;b.textContent='搜索'}}
+function renderResults(r){const c=document.getElementById('results');if(!r||r.length===0){c.innerHTML='<div class="empty-state">未找到匹配的文档。</div>';return}c.innerHTML=r.map((x,i)=>`<div class="result-item"><span class="result-rank">#${i+1}</span><div class="result-info"><span class="result-id">${esc(x.doc_id)}</span><div class="result-snippet">${esc(x.snippet)}</div></div>${x.snippet==='[PROTECTED by SecureAI]'?'<span class="result-protected">🔒 已加密保护</span>':'<span class="result-score">'+x.score.toFixed(4)+'</span>'}</div>`).join('')}
+function renderError(m){document.getElementById('results').innerHTML='<div class="empty-state" style="color:var(--red)">⚠ '+esc(m)+'</div>'}
+</script>
+</body>
+</html>

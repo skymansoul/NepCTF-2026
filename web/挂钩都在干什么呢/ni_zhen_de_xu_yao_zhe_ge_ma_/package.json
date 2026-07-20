@@ -1,0 +1,11 @@
+{
+  "name": "vite-hidden-transport",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "start": "vite --host 0.0.0.0 --port 5173"
+  },
+  "dependencies": {
+    "vite": "6.4.1"
+  }
+}

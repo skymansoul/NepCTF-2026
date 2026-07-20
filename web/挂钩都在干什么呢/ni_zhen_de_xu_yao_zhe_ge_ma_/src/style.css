@@ -1,0 +1,349 @@
+:root {
+  --bg: #0b1117;
+  --panel: rgba(15, 22, 31, 0.88);
+  --panel-2: rgba(20, 29, 40, 0.92);
+  --line: rgba(165, 184, 204, 0.20);
+  --text: #dce7f3;
+  --muted: #8fa1b5;
+  --accent: #61d4ff;
+  --accent-2: #f4c95d;
+  --danger: #ff6b6b;
+  --ok: #59d68d;
+  --shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 20% 12%, rgba(75, 121, 161, 0.22), transparent 26rem),
+    radial-gradient(circle at 82% 20%, rgba(82, 113, 102, 0.18), transparent 22rem),
+    linear-gradient(135deg, #070b10 0%, #111820 48%, #090d12 100%);
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+.page {
+  width: min(1180px, calc(100vw - 32px));
+  margin: 28px auto 48px;
+}
+
+.panel,
+.map-card {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+
+.panel {
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.title-block {
+  margin-bottom: 18px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(24px, 4vw, 38px);
+  line-height: 1.08;
+  font-weight: 760;
+}
+
+.desc {
+  margin-top: 10px;
+  color: var(--muted);
+  line-height: 1.65;
+  max-width: 860px;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.5fr) minmax(220px, 1fr) auto auto auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.field {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0 12px;
+  color: var(--text);
+  background: rgba(5, 10, 16, 0.78);
+  outline: none;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: rgba(97, 212, 255, 0.74);
+  box-shadow: 0 0 0 3px rgba(97, 212, 255, 0.10);
+}
+
+.btn {
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--text);
+  background: rgba(22, 32, 44, 0.92);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.btn.primary {
+  border-color: rgba(97, 212, 255, 0.42);
+  background: linear-gradient(180deg, rgba(41, 145, 187, 0.90), rgba(22, 90, 120, 0.92));
+}
+
+.btn.danger {
+  border-color: rgba(255, 107, 107, 0.34);
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #5b6570;
+  box-shadow: 0 0 0 4px rgba(91, 101, 112, 0.16);
+}
+
+.dot.connected {
+  background: var(--ok);
+  box-shadow: 0 0 0 4px rgba(89, 214, 141, 0.16);
+}
+
+.dot.error {
+  background: var(--danger);
+  box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.16);
+}
+
+.split {
+  width: 1px;
+  height: 14px;
+  background: var(--line);
+}
+
+.map-card {
+  position: relative;
+  margin-top: 18px;
+  border-radius: 22px;
+  overflow: hidden;
+  padding: 14px;
+  background: var(--panel-2);
+}
+
+.map-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #06090d;
+  user-select: none;
+}
+
+.map-wrap img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: contrast(1.05) brightness(0.92);
+}
+
+.marker-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.marker {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background:
+    radial-gradient(circle at 50% 50%, #fff 0 11%, transparent 12%),
+    radial-gradient(circle at 50% 50%, var(--accent-2) 0 45%, rgba(244, 201, 93, 0.12) 46% 100%);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.72),
+    0 0 0 8px rgba(244, 201, 93, 0.18),
+    0 0 26px rgba(244, 201, 93, 0.75);
+  cursor: crosshair;
+  pointer-events: auto;
+  color: #15110a;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.marker::after {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  border: 1px solid rgba(244, 201, 93, 0.34);
+  border-radius: 50%;
+  animation: pulse 1.8s ease-out infinite;
+}
+
+.marker span {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes pulse {
+  from {
+    opacity: 0.72;
+    transform: scale(0.64);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(1.32);
+  }
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 30;
+  max-width: min(360px, calc(100vw - 28px));
+  padding: 12px 14px;
+  border: 1px solid rgba(97, 212, 255, 0.38);
+  border-radius: 12px;
+  color: var(--text);
+  background: rgba(5, 10, 16, 0.94);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.54);
+  pointer-events: none;
+  white-space: pre-wrap;
+  line-height: 1.5;
+  font-size: 13px;
+}
+
+.tooltip .tip-title {
+  margin-bottom: 6px;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.payload-panel {
+  margin-top: 18px;
+}
+
+.payload-title {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.payload-title h2 {
+  font-size: 17px;
+}
+
+.payload-title p {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+code {
+  color: #d8edff;
+  background: rgba(97, 212, 255, 0.10);
+  border: 1px solid rgba(97, 212, 255, 0.12);
+  border-radius: 6px;
+  padding: 1px 5px;
+}
+
+pre {
+  min-height: 92px;
+  margin: 12px 0 0;
+  overflow: auto;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: #c9d8e6;
+  background: rgba(3, 7, 12, 0.72);
+  font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+@media (max-width: 920px) {
+  .controls {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .field-url {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 620px) {
+  .page {
+    width: min(100vw - 18px, 1180px);
+    margin-top: 10px;
+  }
+
+  .panel,
+  .map-card {
+    border-radius: 14px;
+  }
+
+  .controls {
+    grid-template-columns: 1fr;
+  }
+
+  .payload-title {
+    display: block;
+  }
+
+  .payload-title p {
+    margin-top: 6px;
+  }
+}
